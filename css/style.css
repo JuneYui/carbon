@@ -1,0 +1,1012 @@
+/* ==========================================================================
+   国网区域新型电力系统 · 碳感知计算与决策平台
+   生产级工业暗黑调度中台视觉规范样式表
+   ========================================================================== */
+
+:root {
+  --bg-main: #070a12;
+  --bg-card: rgba(13, 20, 36, 0.78);
+  --bg-card-hover: rgba(18, 28, 51, 0.88);
+  --bg-card-elevated: #111a30;
+  --border-subtle: rgba(56, 189, 248, 0.14);
+  --border-glow: rgba(56, 189, 248, 0.4);
+  --border-active: #06b6d4;
+  
+  --color-primary: #06b6d4;
+  --color-primary-glow: rgba(6, 182, 212, 0.25);
+  --color-success: #10b981;
+  --color-success-glow: rgba(16, 185, 129, 0.25);
+  --color-warning: #f59e0b;
+  --color-warning-glow: rgba(245, 158, 11, 0.25);
+  --color-danger: #ef4444;
+  --color-danger-glow: rgba(239, 68, 68, 0.25);
+  --color-purple: #8b5cf6;
+  
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, "PingFang SC", "Microsoft YaHei", monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-panel: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(ellipse at 15% 0%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 10%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* 自定义高端滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(11, 16, 28, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.5);
+}
+
+/* ==========================================================================
+   全局顶栏 Header
+   ========================================================================== */
+.platform-header {
+  height: 64px;
+  background: rgba(9, 14, 26, 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #06b6d4, #10b981);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.35);
+}
+
+.brand-logo-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.brand-titles h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #ffffff, #93c5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  letter-spacing: 0.2px;
+}
+
+/* 中间导航 Tabs */
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.75);
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  gap: 4px;
+}
+
+.nav-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-tab-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.nav-tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-tab-btn.active {
+  color: #38bdf8;
+  background: rgba(6, 182, 212, 0.15);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.25) inset;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* 右侧运行状态面板 */
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-success);
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--color-success);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 8px var(--color-success);
+}
+
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-success);
+  animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.clock-display {
+  text-align: right;
+}
+
+.clock-time {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.clock-date {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   页面主框架
+   ========================================================================== */
+.main-viewport {
+  padding: 16px 24px 32px;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* 通用面板卡片 */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.panel-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+}
+
+.panel-title svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--color-primary);
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+.tag-cyan { background: rgba(6, 182, 212, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); }
+.tag-green { background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+.tag-amber { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+.tag-red { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); }
+.tag-purple { background: rgba(139, 92, 246, 0.12); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.25); }
+
+/* ==========================================================================
+   模块一：碳感知驾驶舱 (Cockpit)
+   ========================================================================== */
+.cockpit-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.kpi-card {
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--color-primary);
+}
+.kpi-card.green::before { background: var(--color-success); }
+.kpi-card.amber::before { background: var(--color-warning); }
+.kpi-card.purple::before { background: var(--color-purple); }
+
+.kpi-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.kpi-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+
+.kpi-unit {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.kpi-foot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.kpi-trend-up { color: var(--color-danger); }
+.kpi-trend-down { color: var(--color-success); }
+
+/* 驾驶舱两栏布局 */
+.cockpit-main-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
+}
+
+/* 碳流拓扑与态势图 */
+.carbon-flow-stage {
+  height: 520px;
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.9) 0%, rgba(8, 12, 22, 0.98) 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.stage-overlay-legend {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  gap: 16px;
+  background: rgba(9, 14, 26, 0.8);
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  font-size: 11px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+.dot-red { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; }
+.dot-orange { width: 8px; height: 8px; background: #f97316; border-radius: 50%; }
+.dot-green { width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
+.dot-blue { width: 8px; height: 8px; background: #06b6d4; border-radius: 50%; }
+.dot-purple { width: 8px; height: 8px; background: #8b5cf6; border-radius: 50%; }
+
+#carbonFlowCanvas {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+/* 驾驶舱右侧图表堆叠 */
+.cockpit-charts-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chart-box-md {
+  height: 252px;
+  padding: 10px 14px;
+}
+
+/* ==========================================================================
+   模块二：多源数据接入与动态融合计算中心 (Fusion Engine)
+   ========================================================================== */
+.fusion-top-stat {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.fusion-sources-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.data-source-card {
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.data-source-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-glow);
+}
+
+.ds-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ds-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.ds-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+}
+
+.ds-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+.ds-meta-k { color: var(--text-dim); }
+.ds-meta-v { color: #cbd5e1; font-family: var(--font-mono); font-weight: 500; }
+
+.ds-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* 跨源关联与动态融合对比双列 */
+.fusion-split-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 16px;
+}
+
+/* 关联发现表格 */
+.association-table-wrap {
+  overflow-x: auto;
+}
+
+.pro-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+
+.pro-table th {
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.pro-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+}
+
+.pro-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.score-bar {
+  width: 70px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #10b981);
+}
+
+/* ==========================================================================
+   模块三：全环节碳足迹知识图谱构建与核算 (Knowledge Graph)
+   ========================================================================== */
+.kg-toolbar {
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.kg-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kg-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kg-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.kg-btn.active {
+  background: rgba(6, 182, 212, 0.2);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+/* 图谱工作区两栏 */
+.kg-workspace-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.kg-chart-container {
+  height: 620px;
+  position: relative;
+  background: radial-gradient(circle at 40% 45%, rgba(13, 20, 36, 0.7) 0%, rgba(7, 10, 18, 0.95) 100%);
+}
+
+#knowledgeGraphChart {
+  width: 100%;
+  height: 100%;
+}
+
+/* 图谱抽屉与核算面板 */
+.kg-side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accounting-card {
+  padding: 16px;
+}
+
+.enterprise-select {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: #ffffff;
+  font-size: 13px;
+  margin-bottom: 12px;
+  outline: none;
+}
+
+.accounting-stat-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.acc-box {
+  background: rgba(15, 23, 42, 0.5);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.acc-k { font-size: 11px; color: var(--text-dim); }
+.acc-v { font-size: 16px; font-weight: 700; color: #ffffff; font-family: var(--font-mono); margin-top: 2px; }
+
+.source-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.source-item-progress {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.trace-path-badge {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: rgba(6, 182, 212, 0.08);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(56, 189, 248, 0.3);
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   模块四：因果图推理与关键影响因子归因系统 (Causal Reasoning)
+   ========================================================================== */
+.reasoning-scenario-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.scenario-card-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scenario-card-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-glow);
+}
+
+.scenario-card-btn.active {
+  border-color: #06b6d4;
+  background: rgba(6, 182, 212, 0.12);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.2);
+}
+
+.scenario-btn-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.scenario-btn-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 推理工作区 */
+.reasoning-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
+}
+
+.reasoning-stepper {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.step-item {
+  display: flex;
+  gap: 14px;
+  position: relative;
+}
+
+.step-item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: 11px;
+  width: 2px;
+  height: calc(100% + 4px);
+  background: rgba(56, 189, 248, 0.2);
+}
+
+.step-index-bubble {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid #06b6d4;
+  color: #38bdf8;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+}
+
+.step-content {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.step-node-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-bottom: 2px;
+}
+
+.step-desc {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.step-prob {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-success);
+  margin-top: 4px;
+}
+
+/* 归因排行横向条形 */
+.factor-rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.factor-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.factor-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.factor-name {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.factor-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.factor-bar-val {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #ef4444);
+  border-radius: 4px;
+}
+
+.advice-callout {
+  margin-top: 14px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #a7f3d0;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   模块五：系统底座与技术架构总览 (Architecture & Standards)
+   ========================================================================== */
+.tech-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pillar-card {
+  padding: 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pillar-badge {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--color-primary);
+  text-transform: uppercase;
+}
+
+.pillar-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pillar-summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.pillar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.std-lib-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 16px;
+}
+
+/* ==========================================================================
+   通用交互控件与动效
+   ========================================================================== */
+.btn-action {
+  background: linear-gradient(135deg, #06b6d4, #0284c7);
+  border: none;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-action:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.btn-action:active {
+  transform: scale(0.98);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover {
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+/* 页脚底栏 */
+.platform-footer {
+  margin-top: 32px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+/* 响应式微调 */
+@media (max-width: 1440px) {
+  .cockpit-main-grid,
+  .fusion-split-grid,
+  .kg-workspace-grid,
+  .reasoning-grid,
+  .std-lib-grid {
+    grid-template-columns: 1fr;
+  }
+  .cockpit-kpi-grid,
+  .tech-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .fusion-sources-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

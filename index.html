@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>国网区域新型电力系统 · 碳感知计算与决策平台</title>
+  
+  <!-- 国内主流稳定镜像 CDN (BootCDN + Baomitu 容灾双保险) -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/vue/3.4.21/vue.global.prod.js"></script>
+  <script>window.Vue || document.write('<script src="https://lib.baomitu.com/vue/3.4.21/vue.global.prod.js"><\/script>')</script>
+
+  <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+  <script>window.echarts || document.write('<script src="https://lib.baomitu.com/echarts/5.5.0/echarts.min.js"><\/script>')</script>
+
+  <!-- 样式规范 -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app" v-cloak>
+    <!-- 全局顶栏 Header -->
+    <header class="platform-header">
+      <div class="brand-section">
+        <div class="brand-logo-icon">
+          <!-- 闪电与碳循环矢量图 -->
+          <svg viewBox="0 0 24 24">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1>{{ data.meta.systemName }}</h1>
+          <div class="brand-sub">{{ data.meta.subTitle }} · {{ data.meta.regionName }}</div>
+        </div>
+      </div>
+
+      <!-- 核心功能导航 Tabs -->
+      <nav class="nav-tabs">
+        <button 
+          class="nav-tab-btn" 
+          :class="{ active: activeTab === 'cockpit' }" 
+          @click="switchTab('cockpit')">
+          <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          碳感知总览驾驶舱
+        </button>
+
+        <button 
+          class="nav-tab-btn" 
+          :class="{ active: activeTab === 'fusion' }" 
+          @click="switchTab('fusion')">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          多源数据接入与融合
+        </button>
+
+        <button 
+          class="nav-tab-btn" 
+          :class="{ active: activeTab === 'kg' }" 
+          @click="switchTab('kg')">
+          <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M8.5 7.5l7 0M7.5 8.5l3.5 7M16.5 8.5l-3.5 7"/></svg>
+          全环节碳足迹知识图谱
+        </button>
+
+        <button 
+          class="nav-tab-btn" 
+          :class="{ active: activeTab === 'reasoning' }" 
+          @click="switchTab('reasoning')">
+          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-9 9c0 3.6 2.1 6.7 5.2 8.1.4.1.6-.2.6-.4v-1.5c-2.5.5-3-1.2-3-1.2-.4-1-1-1.3-1-1.3-.8-.5.1-.5.1-.5.9.1 1.4.9 1.4.9.8 1.4 2.1 1 2.6.8.1-.6.3-1 .6-1.2-2-.2-4.1-1-4.1-4.5 0-1 .4-1.8 1-2.4-.1-.2-.4-1.1.1-2.4 0 0 .8-.2 2.5.9.7-.2 1.5-.3 2.3-.3s1.6.1 2.3.3c1.7-1.2 2.5-.9 2.5-.9.5 1.3.2 2.2.1 2.4.6.6 1 1.4 1 2.4 0 3.5-2.1 4.3-4.1 4.5.3.3.6.8.6 1.7v2.5c0 .2.2.5.6.4C18.9 18.7 21 15.6 21 12a9 9 0 0 0-9-9z"/></svg>
+          因果图推理与归因系统
+        </button>
+
+        <button 
+          class="nav-tab-btn" 
+          :class="{ active: activeTab === 'architecture' }" 
+          @click="switchTab('architecture')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          技术底座与标准库
+        </button>
+      </nav>
+
+      <!-- 实时运行时状态 -->
+      <div class="header-meta">
+        <div class="status-badge">
+          <span class="pulse-dot"></span>
+          <span>系统在线 · {{ networkLatency }}ms</span>
+        </div>
+        <div class="clock-display">
+          <div class="clock-time">{{ currentTimeStr }}</div>
+          <div class="clock-date">{{ currentDateStr }}</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 页面核心视口 -->
+    <main class="main-viewport">
+
+      <!-- ===================================================================
+           TAB 1: 区域碳感知驾驶舱 (Cockpit)
+           =================================================================== -->
+      <section v-show="activeTab === 'cockpit'">
+        <!-- 核心 KPI 动态指标栏 -->
+        <div class="cockpit-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label-row">
+              <span>区域瞬时碳排放通量</span>
+              <span class="tag-pill tag-red">实时遥测 CEMS</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value">{{ liveCarbonFlux }}</span>
+              <span class="kpi-unit">tCO₂/h</span>
+            </div>
+            <div class="kpi-foot-row">
+              <span>环比上小时 <b class="kpi-trend-down">-4.2%</b></span>
+              <span>发用全要素闭环</span>
+            </div>
+          </div>
+
+          <div class="kpi-card green">
+            <div class="kpi-label-row">
+              <span>区域实时动态碳因子 (EF)</span>
+              <span class="tag-pill tag-cyan">源荷加权动态算力</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value">{{ liveDynamicEf }}</span>
+              <span class="kpi-unit">gCO₂/kWh</span>
+            </div>
+            <div class="kpi-foot-row">
+              <span>今日极低值: 398.6</span>
+              <span>基准线: 577.7 (全国网标)</span>
+            </div>
+          </div>
+
+          <div class="kpi-card amber">
+            <div class="kpi-label-row">
+              <span>新能源即时消纳占比</span>
+              <span class="tag-pill tag-green">风光零碳机组</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value">{{ liveRenewableShare }}</span>
+              <span class="kpi-unit">%</span>
+            </div>
+            <div class="kpi-foot-row">
+              <span>海上风电 150MW | 光伏 40MW</span>
+              <span>平抑度: 优秀</span>
+            </div>
+          </div>
+
+          <div class="kpi-card purple">
+            <div class="kpi-label-row">
+              <span>区域电网综合运行负荷</span>
+              <span class="tag-pill tag-purple">SCADA 母线平衡</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value">{{ liveLoad }}</span>
+              <span class="kpi-unit">MW</span>
+            </div>
+            <div class="kpi-foot-row">
+              <span>输电网损率: 0.81%</span>
+              <span>受电断面裕度: 32.4%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 主网架碳流拓扑与图表组 -->
+        <div class="cockpit-main-grid">
+          <!-- 左侧：源-网-荷-储 动态碳流拓扑场 -->
+          <div class="glass-panel carbon-flow-stage">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+                新型电力系统区域碳流拓扑态势图 (源-网-荷动态粒子传递)
+              </div>
+              <div class="panel-actions">
+                <span class="tag-pill tag-cyan">基尔霍夫碳流平衡守恒</span>
+              </div>
+            </div>
+
+            <!-- 图例栏 -->
+            <div class="stage-overlay-legend">
+              <div class="legend-item"><span class="dot-red"></span>超临界燃煤 (高碳)</div>
+              <div class="legend-item"><span class="dot-orange"></span>燃气调峰 (中碳)</div>
+              <div class="legend-item"><span class="dot-green"></span>风电/光伏 (零碳)</div>
+              <div class="legend-item"><span class="dot-blue"></span>变电站潮流中继</div>
+              <div class="legend-item"><span class="dot-purple"></span>终端工业/智算负荷</div>
+            </div>
+
+            <!-- Canvas 动态粒子管网渲染层 -->
+            <canvas id="carbonFlowCanvas"></canvas>
+          </div>
+
+          <!-- 右侧：动态碳因子演化曲线与电源结构 -->
+          <div class="cockpit-charts-col">
+            <!-- 24小时动态碳因子曲线 -->
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  24小时分时动态碳因子演化与发电结构堆叠 (EF_dynamic)
+                </div>
+                <div class="panel-actions">
+                  <span class="tag-pill tag-green">光伏大发低碳谷底清晰显现</span>
+                </div>
+              </div>
+              <div id="dynamicEfChart" class="chart-box-md"></div>
+            </div>
+
+            <!-- 下方双并图表：电源结构环形图 + CEMS 烟气流 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="glass-panel">
+                <div class="panel-header">
+                  <div class="panel-title">实时电源装机与出力构成</div>
+                </div>
+                <div id="genMixRingChart" style="height: 190px;"></div>
+              </div>
+
+              <div class="glass-panel">
+                <div class="panel-header">
+                  <div class="panel-title">CEMS 烟气在线排口连续通量</div>
+                </div>
+                <div id="cemsStreamChart" style="height: 190px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 2: 多源数据接入与融合计算中心 (Fusion Engine)
+           =================================================================== -->
+      <section v-show="activeTab === 'fusion'">
+        <!-- 融合中心全局健康看板 -->
+        <div class="fusion-top-stat">
+          <div class="kpi-card">
+            <div class="kpi-label-row"><span>接入数据源系统</span><span class="tag-pill tag-cyan">全协议直采</span></div>
+            <div class="kpi-value-row"><span class="kpi-value">6</span><span class="kpi-unit">个核心集群</span></div>
+            <div class="kpi-foot-row"><span>覆盖测点 28,450 个</span><span>OPC UA / MQTT / 104</span></div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label-row"><span>统一语义对齐完整率</span><span class="tag-pill tag-green">TransTab 空间投影</span></div>
+            <div class="kpi-value-row"><span class="kpi-value">{{ data.fusionPerformance.dataCompletenessAfter }}</span><span class="kpi-unit">比前提升12.2%</span></div>
+            <div class="kpi-foot-row"><span>字段对齐时延 &lt; 1.2s</span><span>跨模态高维特征对齐</span></div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label-row"><span>状态空间融合计算延迟</span><span class="tag-pill tag-amber">Mamba / SSM 核心</span></div>
+            <div class="kpi-value-row"><span class="kpi-value">{{ data.fusionPerformance.fusionDelay }}</span><span class="kpi-unit">实时流批一体</span></div>
+            <div class="kpi-foot-row"><span>空间克里金网格精度 96.8%</span><span>线性计算复杂度 O(N)</span></div>
+          </div>
+          <div class="kpi-card purple">
+            <div class="kpi-label-row"><span>今日接入入库有效记录</span><span class="tag-pill tag-purple">区块链防篡改</span></div>
+            <div class="kpi-value-row"><span class="kpi-value">2,484,650</span><span class="kpi-unit">条</span></div>
+            <div class="kpi-foot-row"><span>存证节点: 沪东电力区块链</span><span>数据可信溯源</span></div>
+          </div>
+        </div>
+
+        <!-- 六大数据源接入状态卡片阵列 -->
+        <div class="fusion-sources-grid">
+          <div class="data-source-card" v-for="ds in data.dataSources" :key="ds.id">
+            <div class="ds-card-head">
+              <span class="ds-name">{{ ds.name }}</span>
+              <span class="tag-pill" :class="ds.status === 'RUNNING' ? 'tag-green' : 'tag-amber'">{{ ds.statusText }}</span>
+            </div>
+            <div class="ds-metrics-grid">
+              <div class="ds-meta-item"><span class="ds-meta-k">通信规约</span><span class="ds-meta-v">{{ ds.protocol }}</span></div>
+              <div class="ds-meta-item"><span class="ds-meta-k">刷新周期</span><span class="ds-meta-v">{{ ds.frequency }}</span></div>
+              <div class="ds-meta-item"><span class="ds-meta-k">今日吞吐</span><span class="ds-meta-v">{{ ds.todayVolume }} 条</span></div>
+              <div class="ds-meta-item"><span class="ds-meta-k">传输时延</span><span class="ds-meta-v">{{ ds.latency }}</span></div>
+            </div>
+            <div class="ds-desc">{{ ds.metrics }}</div>
+          </div>
+        </div>
+
+        <!-- 跨源关联发现与动态融合对比 -->
+        <div class="fusion-split-grid">
+          <!-- 跨源特征关联发现网络 -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                跨源多维电碳特征自动挖掘与关联发现 (HGSL 异质拓扑网络)
+              </div>
+              <div class="panel-actions">
+                <span class="tag-pill tag-cyan">自动发现 6 组深层隐藏关联</span>
+              </div>
+            </div>
+
+            <div class="association-table-wrap">
+              <table class="pro-table">
+                <thead>
+                  <tr>
+                    <th>头实体 (源端数据源)</th>
+                    <th>因果关联判定</th>
+                    <th>尾实体 (目标受体)</th>
+                    <th>RotatE 置信度</th>
+                    <th>物理与工程校验状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="rel in data.crossSourceAssociations" :key="rel.id">
+                    <td>
+                      <div style="font-weight:600;color:#ffffff;">{{ rel.headEntity }}</div>
+                      <div style="font-size:10px;color:#64748b;">{{ rel.sourceFrom }}</div>
+                    </td>
+                    <td>
+                      <span :class="rel.isNewlyDiscovered ? 'tag-pill tag-amber' : 'tag-pill tag-cyan'">{{ rel.relation }}</span>
+                      <span v-if="rel.isNewlyDiscovered" style="font-size:10px;color:#f59e0b;margin-left:4px;">★ 新拓扑发现</span>
+                    </td>
+                    <td>
+                      <div style="font-weight:600;color:#ffffff;">{{ rel.tailEntity }}</div>
+                      <div style="font-size:10px;color:#64748b;">{{ rel.sourceTo }}</div>
+                    </td>
+                    <td>
+                      <div class="score-bar"><div class="score-fill" :style="{ width: (rel.confidence * 100) + '%' }"></div></div>
+                      <span style="font-family:monospace;font-size:11px;">{{ rel.confidence.toFixed(3) }}</span>
+                    </td>
+                    <td>
+                      <span class="tag-pill tag-green">{{ rel.validation }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 时空多模态动态融合前后对比 + MoE 动态门控路由 -->
+          <div class="glass-panel" style="display:flex; flex-direction:column;">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                多时空尺度融合前后拟合质量对比 (状态空间架构)
+              </div>
+              <div class="panel-actions">
+                <span class="tag-pill tag-green">有效剔除数据噪点与采样延迟</span>
+              </div>
+            </div>
+
+            <div id="fusionCompareChart" style="height: 250px;"></div>
+
+            <!-- MoE 门控路由专家状态 -->
+            <div style="border-top: 1px solid var(--border-subtle); padding: 12px 16px; background: rgba(15,23,42,0.4);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:12px; font-weight:600; color:#cbd5e1;">时空 MoE 动态门控路由专家权重分配</span>
+                <span class="tag-pill tag-cyan">{{ data.fusionPerformance.moeRouter.activeState }}</span>
+              </div>
+              <div style="display:flex; gap:16px;">
+                <div id="moeRouterChart" style="width: 140px; height: 110px;"></div>
+                <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:8px; font-size:11px;">
+                  <div>时间微观波动专家 (高频毫秒级捕捉): <b style="color:#06b6d4; font-family:monospace;">{{ data.fusionPerformance.moeRouter.temporalExpertWeight }}%</b></div>
+                  <div>空间拓扑扩散专家 (区域中尺度平滑): <b style="color:#10b981; font-family:monospace;">{{ data.fusionPerformance.moeRouter.spatialExpertWeight }}%</b></div>
+                  <div style="color:var(--text-dim);">门控网络根据新能源并网波动率自适应倾斜调度算力权重。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 3: 全环节碳足迹知识图谱构建与核算 (Knowledge Graph & Accounting)
+           =================================================================== -->
+      <section v-show="activeTab === 'kg'">
+        <!-- 图谱顶部管线控制台 -->
+        <div class="glass-panel" style="margin-bottom: 16px;">
+          <div class="kg-toolbar">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:13px; font-weight:600; color:#ffffff;">图谱自动化构建管线状态:</span>
+              <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
+                <span class="tag-pill" :class="kgPipelineStep >= 1 ? 'tag-cyan' : ''">① 双视角实体抽取</span>
+                <span style="color:#64748b;">→</span>
+                <span class="tag-pill" :class="kgPipelineStep >= 2 ? 'tag-cyan' : ''">② 关联边拓扑对齐</span>
+                <span style="color:#64748b;">→</span>
+                <span class="tag-pill" :class="kgPipelineStep >= 3 ? 'tag-green' : ''">③ 物理/业务双重约束校验</span>
+                <span style="color:#64748b;">→</span>
+                <span class="tag-pill" :class="kgPipelineStep >= 4 ? 'tag-purple' : ''">④ 图谱全景固化 (18实体20关系)</span>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button class="btn-action" @click="playKgPipeline" :disabled="isPipelinePlaying">
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>{{ isPipelinePlaying ? '正在演化构建...' : '回放自动化构建全流程' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 知识图谱主体浏览器与核算侧边栏 -->
+        <div class="kg-workspace-grid">
+          <!-- 左侧：交互式力导向知识图谱 -->
+          <div class="glass-panel kg-chart-container">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/></svg>
+                电力全环节碳足迹知识图谱浏览器 (支持拖拽探索 / 滚轮缩放 / 实体穿透点击)
+              </div>
+              <div class="panel-actions">
+                <span class="tag-pill tag-green">双重校验 PASS (基尔霍夫守恒 100%)</span>
+              </div>
+            </div>
+            <div id="knowledgeGraphChart"></div>
+          </div>
+
+          <!-- 右侧：基于图谱的企业穿透式用电碳足迹核算 -->
+          <div class="kg-side-col">
+            <div class="glass-panel accounting-card">
+              <div class="panel-header" style="margin: -16px -16px 16px; padding: 12px 16px;">
+                <div class="panel-title">企业穿透式用电碳足迹核算账单</div>
+                <div class="panel-actions"><span class="tag-pill tag-cyan">图谱拓扑回溯</span></div>
+              </div>
+
+              <!-- 重点纳管企业切换 -->
+              <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:4px;">选择重点监测核算用电主体:</label>
+              <select class="enterprise-select" v-model="activeEnterpriseId" @change="selectEnterprise(activeEnterpriseId)">
+                <option value="C1">企业A · 临港先进高精化工联合体 (高耗能纳管)</option>
+                <option value="C2">企业B · 临港高端智能装备重工基地 (装备制造)</option>
+                <option value="C3">企业C · 临云绿色智算中心 (AIDC算力枢纽)</option>
+              </select>
+
+              <!-- 核心账单核算数值 -->
+              <div class="accounting-stat-row">
+                <div class="acc-box">
+                  <div class="acc-k">月度总用电量</div>
+                  <div class="acc-v">{{ currentAccounting.monthlyPowerUsage }}</div>
+                </div>
+                <div class="acc-box">
+                  <div class="acc-k">穿透折算碳排放总量</div>
+                  <div class="acc-v" style="color:#ef4444;">{{ currentAccounting.totalCarbonEmissions }}</div>
+                </div>
+                <div class="acc-box">
+                  <div class="acc-k">综合电碳强度</div>
+                  <div class="acc-v" style="color:#38bdf8;">{{ currentAccounting.averageCarbonIntensity }}</div>
+                </div>
+                <div class="acc-box">
+                  <div class="acc-k">绿电消纳比重</div>
+                  <div class="acc-v" style="color:#10b981;">{{ currentAccounting.greenPowerShare }}</div>
+                </div>
+              </div>
+
+              <!-- 电源来源构成穿透明细 -->
+              <div style="font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">图谱溯源电源分摊比例:</div>
+              <div class="source-breakdown-list">
+                <div v-for="sb in currentAccounting.sourceBreakdown" :key="sb.source">
+                  <div class="source-item">
+                    <span>{{ sb.source }}</span>
+                    <span style="font-family:monospace; font-weight:600;">{{ sb.share }}% ({{ sb.power }})</span>
+                  </div>
+                  <div class="source-item-progress">
+                    <div :style="{ width: sb.share + '%', background: sb.share > 50 ? '#ef4444' : (sb.share > 20 ? '#10b981' : '#f59e0b'), height:'100%' }"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 图谱供电物理穿透路径 -->
+              <div style="font-size:11px; color:var(--text-dim); margin-top:8px;">图谱追踪供电物理与碳流路由:</div>
+              <div class="trace-path-badge">
+                <span v-for="(node, idx) in currentAccounting.traceRoute" :key="node">
+                  {{ node }} <b v-if="idx < currentAccounting.traceRoute.length - 1" style="color:#06b6d4;">→</b>
+                </span>
+              </div>
+
+              <!-- 区块链防伪认证与机构核准 -->
+              <div style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); font-size:11px; color:var(--text-dim);">
+                <div>存证哈希: <span style="font-family:monospace; color:#38bdf8;">{{ currentAccounting.auditProofHash.slice(0, 20) }}...</span></div>
+                <div>核验认证: {{ currentAccounting.auditAgency }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 4: 因果图推理与归因系统 (Causal Reasoning)
+           =================================================================== -->
+      <section v-show="activeTab === 'reasoning'">
+        <!-- 典型运行场景选择器 -->
+        <div class="reasoning-scenario-bar">
+          <div 
+            class="scenario-card-btn" 
+            v-for="sc in data.reasoningScenarios" 
+            :key="sc.id" 
+            :class="{ active: activeScenarioId === sc.id }" 
+            @click="selectScenario(sc.id)">
+            <div class="scenario-btn-title">{{ sc.title }}</div>
+            <div class="scenario-btn-desc">{{ sc.targetQuery }}</div>
+          </div>
+        </div>
+
+        <!-- 推理推演面板与因子贡献度归因 -->
+        <div class="reasoning-grid">
+          <!-- 左侧：因果链条游走与步骤激活面板 -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                动态因果图路径游走演化与激活机制 (一阶链式逻辑推演)
+              </div>
+              <div class="panel-actions">
+                <button class="btn-action" @click="runCausalReasoning" :disabled="isReasoningRunning">
+                  <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>{{ isReasoningRunning ? '正在游走推演...' : '启动因果归因推演' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="reasoning-stepper">
+              <div 
+                class="step-item" 
+                v-for="(st, idx) in currentScenario.pathSteps" 
+                :key="st.step" 
+                v-show="reasoningStep >= st.step">
+                <div class="step-index-bubble">{{ st.step }}</div>
+                <div class="step-content">
+                  <div class="step-node-name">{{ st.node }}</div>
+                  <div class="step-desc">{{ st.state }}</div>
+                  <div class="step-prob">路径转移置信度: {{ (st.probability * 100).toFixed(1) }}% · 规则已激活</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 一阶软逻辑规则库匹配状态 -->
+            <div style="padding: 12px 16px; background: rgba(15,23,42,0.4); border-top: 1px solid var(--border-subtle);">
+              <div style="font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:8px;">激活的核心软规则与影响权重:</div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <div v-for="r in currentScenario.ruleActivations" :key="r.rule" style="display:flex; justify-content:space-between; font-size:11px; color:#94a3b8;">
+                  <span>{{ r.rule }}</span>
+                  <span style="font-family:monospace; color:#38bdf8;">权重: {{ (r.impact * 100).toFixed(0) }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧：Top-K 关键因子归因贡献度排行与治理决策建议 -->
+          <div class="glass-panel" style="display:flex; flex-direction:column;">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Top-K 核心影响因子定量归因排行 (Shapley因果权重)
+              </div>
+              <div class="panel-actions"><span class="tag-pill tag-red">定量因果显著</span></div>
+            </div>
+
+            <!-- 横向贡献度柱状图 -->
+            <div id="reasoningFactorChart" style="height: 240px; padding: 10px;"></div>
+
+            <!-- 智能治理与优化决策建议卡片 -->
+            <div style="padding: 16px; margin-top: auto; border-top: 1px solid var(--border-subtle);">
+              <div style="font-size:12px; font-weight:600; color:#38bdf8; display:flex; align-items:center; gap:6px;">
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#38bdf8;fill:none;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                系统自主生成电碳协同调控决策建议:
+              </div>
+              <div class="advice-callout">{{ currentScenario.decisionAdvice }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 5: 系统底座与技术架构总览 (System Architecture & Standards)
+           =================================================================== -->
+      <section v-show="activeTab === 'architecture'">
+        <!-- 四大核心技术支柱白皮书 -->
+        <div class="tech-pillars-grid">
+          <div class="pillar-card">
+            <span class="pillar-badge">支柱一 · 异质感知</span>
+            <div class="pillar-title">多源异构电碳数据感知与自演化关联挖掘</div>
+            <div class="pillar-summary">
+              针对EMS、SCADA、CEMS等六大异构数据源，基于TransTab语义空间统一编码与HGSL异质图结构自演化，自动识别源-网-荷-储实体间的隐藏关联三元组，并通过RotatE复数空间打分与热力学物理校验。
+            </div>
+            <div class="pillar-tags">
+              <span class="tag-pill tag-cyan">TransTab 对齐</span>
+              <span class="tag-pill tag-green">HGSL 拓扑演化</span>
+              <span class="tag-pill tag-amber">RotatE 置信度</span>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <span class="pillar-badge">支柱二 · 动态融合</span>
+            <div class="pillar-title">多模态时空状态空间架构与动态碳因子引擎</div>
+            <div class="pillar-summary">
+              基于状态空间模型(SSM/Mamba)与多模态大模型，完成高频电网微观时序与宏观空间区域数据的长程对齐，配合动态MoE专家路由，实现区域动态碳因子(EF_dynamic)秒级加权计算。
+            </div>
+            <div class="pillar-tags">
+              <span class="tag-pill tag-cyan">SSM 线性对齐</span>
+              <span class="tag-pill tag-purple">MoE 专家门控</span>
+              <span class="tag-pill tag-green">秒级动态因子</span>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <span class="pillar-badge">支柱三 · 知识图谱</span>
+            <div class="pillar-title">电力全环节双视角碳足迹本体与双重约束校验</div>
+            <div class="pillar-summary">
+              融合物理能量流（碳排放流理论）与业务合规流，构建覆盖发、输、变、配、用18类实体30+关系的领域知识图谱，内嵌基尔霍夫碳流守恒与重点企业履约配额双重刚性校验。
+            </div>
+            <div class="pillar-tags">
+              <span class="tag-pill tag-cyan">碳排放流理论</span>
+              <span class="tag-pill tag-amber">双重守恒校验</span>
+              <span class="tag-pill tag-green">穿透式溯源账单</span>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <span class="pillar-badge">支柱四 · 因果推理</span>
+            <div class="pillar-title">基于一阶软逻辑规则与路径信度的因果归因系统</div>
+            <div class="pillar-summary">
+              在知识图谱上构建复数嵌入游走与逻辑规则推理网络，通过粒子路径游走推演量化气象突变、新能源波动对电网碳排放的敏感度，定量输出Top-K因果贡献度与可解释治理方案。
+            </div>
+            <div class="pillar-tags">
+              <span class="tag-pill tag-cyan">因果路径游走</span>
+              <span class="tag-pill tag-green">软逻辑规则激活</span>
+              <span class="tag-pill tag-red">Top-K 归因报告</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 现行权威排放因子与核算标准库 -->
+        <div class="std-lib-grid">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div class="panel-title">中华人民共和国生态环境部2024年官方电力碳足迹因子公报标准库</div>
+              <div class="panel-actions"><span class="tag-pill tag-green">现行国家法定基准</span></div>
+            </div>
+            <div class="association-table-wrap">
+              <table class="pro-table">
+                <thead>
+                  <tr>
+                    <th>能源与电源类型</th>
+                    <th>标准代码</th>
+                    <th>法定排放因子 (kgCO₂e/kWh)</th>
+                    <th>折算因子 (gCO₂/kWh)</th>
+                    <th>规程与权威出处</th>
+                    <th>核定认证等级</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="ef in data.emissionFactorLib" :key="ef.code">
+                    <td style="font-weight:600; color:#ffffff;">{{ ef.type }}</td>
+                    <td style="font-family:monospace; color:#38bdf8;">{{ ef.code }}</td>
+                    <td style="font-family:monospace; font-weight:700; color:#10b981;">{{ ef.factor.toFixed(4) }}</td>
+                    <td style="font-family:monospace;">{{ ef.gCO2 }}</td>
+                    <td style="color:#94a3b8;">{{ ef.authority }}</td>
+                    <td><span class="tag-pill tag-cyan">{{ ef.certLevel }}</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 系统运行指标与算法性能 -->
+          <div class="glass-panel" style="padding: 16px;">
+            <div class="panel-header" style="margin: -16px -16px 16px; padding: 12px 16px;">
+              <div class="panel-title">系统核心计算与指标保障体系</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px; font-size:12px;">
+              <div class="acc-box">
+                <div class="acc-k">空间覆盖范围</div>
+                <div class="acc-v">上海临港新型电力系统综合示范区 (源-网-荷-储)</div>
+              </div>
+              <div class="acc-box">
+                <div class="acc-k">时空精度等级</div>
+                <div class="acc-v">15 秒 / 100m² 空间网格反演</div>
+              </div>
+              <div class="acc-box">
+                <div class="acc-k">基尔霍夫碳流方程校验残差</div>
+                <div class="acc-v" style="color:#10b981;">&lt; 0.28% (严密守恒)</div>
+              </div>
+              <div class="acc-box">
+                <div class="acc-k">数据防篡改背书</div>
+                <div class="acc-v" style="color:#38bdf8;">{{ data.meta.blockchainNode }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 节点详情弹窗抽屉 -->
+    <div 
+      v-if="activeNodeDetail" 
+      style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:999; display:flex; align-items:center; justify-content:center;"
+      @click.self="closeNodeModal">
+      <div class="glass-panel" style="width:480px; padding:20px; border-color:#06b6d4; box-shadow: 0 0 30px rgba(6,182,212,0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div style="font-size:15px; font-weight:700; color:#ffffff;">{{ activeNodeDetail.name }} ({{ activeNodeDetail.id }})</div>
+          <button style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:16px;" @click="closeNodeModal">✕</button>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12px; margin-bottom:14px;">
+          <div v-for="(v, k) in activeNodeDetail" :key="k" v-show="!['id','name','category','symbolSize'].includes(k)" class="acc-box">
+            <span style="color:var(--text-dim); text-transform:uppercase; font-size:10px;">{{ k }}</span>
+            <div style="color:#ffffff; font-weight:600; font-family:monospace; margin-top:2px;">{{ v }}</div>
+          </div>
+        </div>
+        <button class="btn-action" style="width:100%; justify-content:center;" @click="closeNodeModal">关闭详情</button>
+      </div>
+    </div>
+
+    <!-- 全局页脚 -->
+    <footer class="platform-footer">
+      <div>{{ data.meta.systemName }} · {{ data.meta.systemVersion }}</div>
+      <div>标准引用: {{ data.meta.standardRef }} | 空间基准: {{ data.meta.dataResolution }}</div>
+    </footer>
+  </div>
+
+  <!-- 业务数据与应用脚本 -->
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
